@@ -37,6 +37,7 @@ function KV (db, mapFn, opts) {
         mapFn(msgs[i], function (err, ops) {
           if (err) return
           events.emit('update!' + ops[0].key, msgs[i])
+          events.emit('update', ops[0].key, msgs[i])
         })
       }
     },
@@ -72,8 +73,12 @@ function KV (db, mapFn, opts) {
         })
       },
 
-      onUpdate: function (core, key, cb) {
+      onUpdateKey: function (core, key, cb) {
         events.on('update!' + key, cb)
+      },
+
+      onUpdate: function (core, cb) {
+        events.on('update', cb)
       }
     },
 

@@ -71,7 +71,7 @@ test('id kv', function (t) {
     }
 
     var n = 0
-    core.api.kv.onUpdate('foo', function (msg) {
+    core.api.kv.onUpdateKey('foo', function (msg) {
       t.deepEquals(msg.value, msgs[n], 'update correct (value)')
       t.equals(msg.seq, n, 'update correct (seq)')
       n++
@@ -134,7 +134,7 @@ test('id ca', function (t) {
       })
     }
 
-    core.api.ca.onUpdate('8e09a0313464c6b5d57c0e0948d316c94b66f6e02873798d68d5411c84f0303d', function (msg) {
+    core.api.ca.onUpdateKey('8e09a0313464c6b5d57c0e0948d316c94b66f6e02873798d68d5411c84f0303d', function (msg) {
       t.deepEquals(msg.value, msgs[0], 'update correct (value)')
       t.equals(msg.seq, 0, 'update correct (seq)')
       var hash = sha('sha256').update(JSON.stringify(msg.value)).digest('hex')
