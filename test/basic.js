@@ -62,8 +62,8 @@ test('id kv', function (t) {
         collect(core.api.kv.createReadStream(), function (err, res) {
           t.error(err)
           t.deepEquals(res, [
-            { key: 'foo', value: feed.key.toString('hex') + '@1' },
-            { key: 'foo', value: feed.key.toString('hex') + '@2' }
+            { key: 'foo', value: expected[0] },
+            { key: 'foo', value: expected[1] }
           ])
         })
       })

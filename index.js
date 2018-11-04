@@ -77,13 +77,27 @@ function KV (db, mapFn, opts) {
       createReadStream: function (core) {
         var t = through.obj(function (entry, _, next) {
           var self = this
+          var pending = 1
           var res = entry.value.split(',').forEach(function (value) {
-            self.push({
-              key: entry.key.substring(2),
-              value: value
-            })
+            pending++
+            var feed = core._logs.feed(value.split('@')[0])
+            if (feed) {
+              feed.get(value.split('@')[1], function (err, val) {
+                if (!err) {
+                  self.push({
+                    key: entry.key.substring(2),
+                    value: val
+                  })
+                }
+                done()
+              })
+            }
           })
-          next()
+          done()
+
+          function done () {
+            if (!--pending) next()
+          }
         })
         db.createReadStream({gt: 'k!!', lt: 'k!~'}).pipe(t)
         return t
