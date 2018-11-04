@@ -1,5 +1,6 @@
 var umkv = require('unordered-materialized-kv')
 var EventEmitter = require('events').EventEmitter
+var through = require('through2')
 
 module.exports = KV
 
@@ -71,6 +72,21 @@ function KV (db, mapFn, opts) {
             }
           })
         })
+      },
+
+      createReadStream: function (core) {
+        var t = through.obj(function (entry, _, next) {
+          var self = this
+          var res = entry.value.split(',').forEach(function (value) {
+            self.push({
+              key: entry.key.substring(2),
+              value: value
+            })
+          })
+          next()
+        })
+        db.createReadStream({gt: 'k!!', lt: 'k!~'}).pipe(t)
+        return t
       },
 
       onUpdateKey: function (core, key, cb) {

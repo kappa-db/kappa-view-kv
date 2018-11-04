@@ -2,10 +2,11 @@ var test = require('tape')
 var memdb = require('memdb')
 var ram = require('random-access-memory')
 var kappa = require('kappa-core')
+var collect = require('collect-stream')
 var kv = require('..')
 
 test('id kv', function (t) {
-  t.plan(11)
+  t.plan(13)
 
   var core = kappa(ram, { valueEncoding: 'json' })
   var idx = memdb()
@@ -18,16 +19,6 @@ test('id kv', function (t) {
     next(null, ops)
   })
   core.use('kv', kvIdx)
-
-  // var sha = require('sha.js')
-  // var caIdx = kv(idx, function (msg, next) {
-  //   var ops = []
-  //   var hash = sha('sha256').update(JSON.stringify(msg.value)).digest('hex')
-  //   var msgId = msg.key + '@' + msg.seq
-  //   ops.push({ key: hash, id: msgId, links: [] })
-  //   next(null, ops)
-  // })
-  // core.use('ca', caIdx)
 
   core.feed('local', function (err, feed) {
     var docs = [
@@ -67,6 +58,14 @@ test('id kv', function (t) {
           }
         ]
         t.deepEquals(values, expected, 'values match')
+
+        collect(core.api.kv.createReadStream(), function (err, res) {
+          t.error(err)
+          t.deepEquals(res, [
+            { key: 'foo', value: feed.key.toString('hex') + '@1' },
+            { key: 'foo', value: feed.key.toString('hex') + '@2' }
+          ])
+        })
       })
     }
 

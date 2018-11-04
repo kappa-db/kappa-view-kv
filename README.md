@@ -136,6 +136,10 @@ Fetch the latest values for a key. cb is called as `cb(err, values)`. `values`
 is an array, since there may be multiple values mapped to by a key at any given
 point.
 
+### var rs = core.kv.createReadStream()
+
+Returns a readable stream of all keys and their latest `values` mappings.
+
 ### core.kv.onUpdate(fn)
 
 Subscribe to updates to every key change. The function `fn` is called as `fn(key, value)`.
