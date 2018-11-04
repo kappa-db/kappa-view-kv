@@ -32,7 +32,7 @@ core.feed('local', function (err, feed) {
     })
   })
 
-  core.api.kv.onUpdate('foo', function (msg) {
+  core.api.kv.onUpdateKey('foo', function (msg) {
     console.log('update', msg)
   })
 })

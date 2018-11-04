@@ -57,10 +57,11 @@ test('id kv', function (t) {
             links: [ versions[0] ]
           }
         ]
-        t.deepEquals(values, expected, 'values match')
+        t.deepEquals(values.map(v => v.value), expected, 'values match')
 
         collect(core.api.kv.createReadStream(), function (err, res) {
           t.error(err)
+          res = res.map(m => { return { key: m.key, value: m.value.value } })
           t.deepEquals(res, [
             { key: 'foo', value: expected[0] },
             { key: 'foo', value: expected[1] }
@@ -129,6 +130,7 @@ test('id ca', function (t) {
       core.api.ca.get('6bb253dcd04354f71fac02a1a0b0ab68b94e24e3fdb3ed145ff16aa4eec8f98a', function (err, values) {
         t.error(err, 'check ok')
         var expected = [ { id: 'bax', n: 1 } ]
+        values = values.map(v => v.value)
         t.deepEquals(values, expected, 'values match')
       })
     }

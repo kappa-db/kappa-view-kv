@@ -58,7 +58,17 @@ function KV (db, mapFn, opts) {
               // TODO: in fact, can we just expose the 'version' string /w @
               // explicitly?
               var feed = core._logs.feed(id.split('@')[0])
-              feed.get(id.split('@')[1], done)
+              var seq = Number(id.split('@')[1])
+              ;(function (feed, seq) {
+                feed.get(seq, function (err, value) {
+                  if (err) return done(err)
+                  done(null, {
+                    key: feed.key.toString('hex'),
+                    seq: seq,
+                    value: value
+                  })
+                })
+              })(feed, seq)
             }
             done()
 
@@ -82,11 +92,16 @@ function KV (db, mapFn, opts) {
             pending++
             var feed = core._logs.feed(value.split('@')[0])
             if (feed) {
-              feed.get(value.split('@')[1], function (err, val) {
+              var seq = Number(value.split('@')[1])
+              feed.get(seq, function (err, val) {
                 if (!err) {
                   self.push({
                     key: entry.key.substring(2),
-                    value: val
+                    value: {
+                      key: feed.key.toString('hex'),
+                      seq: seq,
+                      value: val
+                    }
                   })
                 }
                 done()

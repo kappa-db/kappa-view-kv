@@ -77,14 +77,12 @@ outputs
 update 0
 update 1
 update 2
-kv for "foo" [ { id: 'foo',
-    n: 3,
-    links: 
-     [ '0f4950f4bbf17dab676e10ce45cc6539e189398b5ce84926c5b60a0826aaecfb@0' ] },
-  { id: 'foo',
-    n: 12,
-    links: 
-     [ '0f4950f4bbf17dab676e10ce45cc6539e189398b5ce84926c5b60a0826aaecfb@0' ] } ]
+kv for "foo" [ { key: '572f824672f0a14ccc45851a04e249506ac234e2e6a9efeac55bfbe4987b9241',
+    seq: 1,
+    value: { id: 'foo', n: 3, links: ['0f4950f4bbf17dab676e10ce45cc6539e189398b5ce84926c5b60a0826aaecfb@0'] } },
+  { key: '572f824672f0a14ccc45851a04e249506ac234e2e6a9efeac55bfbe4987b9241',
+    seq: 2,
+    value: { id: 'foo', n: 12, links: ['0f4950f4bbf17dab676e10ce45cc6539e189398b5ce84926c5b60a0826aaecfb@0'] } } ]
 ```
 
 There are two entries for `'foo'` because both *linked* to the 1st entry, thus
