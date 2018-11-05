@@ -18,6 +18,7 @@ function KV (db, mapFn, opts) {
       for (var i = 0; i < msgs.length; i++) {
         var msg = msgs[i]
         mapFn(msg, function (err, ops) {
+          if (!ops) ops = []
           done(err, ops, msg)
         })
       }
@@ -36,7 +37,7 @@ function KV (db, mapFn, opts) {
     indexed: function (msgs) {
       for (var i = 0; i < msgs.length; i++) {
         mapFn(msgs[i], function (err, ops) {
-          if (err) return
+          if (err || !ops || !ops.length) return
           events.emit('update!' + ops[0].key, msgs[i])
           events.emit('update', ops[0].key, msgs[i])
         })
