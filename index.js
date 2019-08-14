@@ -129,14 +129,14 @@ function KV (db, mapFn, opts) {
     },
 
     storeState: function (state, cb) {
-      db.put('state', state, cb)
+      db.put('state', Buffer.from(state), cb)
     },
 
     fetchState: function (cb) {
       db.get('state', function (err, state) {
         if (err && err.notFound) cb()
         else if (err) cb(err)
-        else cb(null, state)
+        else cb(null, Buffer.from(state))
       })
     },
   }
