@@ -1,15 +1,20 @@
 var test = require('tape')
-var memdb = require('memdb')
+var level = require('level')
 var ram = require('random-access-memory')
 var kappa = require('kappa-core')
 var collect = require('collect-stream')
+var tmp = require('tmp')
 var kv = require('..')
+
+function makedb () {
+  return level(tmp.dirSync().name)
+}
 
 test('id kv', function (t) {
   t.plan(13)
 
   var core = kappa(ram, { valueEncoding: 'json' })
-  var idx = memdb()
+  var idx = makedb()
 
   var kvIdx = kv(idx, function (msg, next) {
     if (!msg.value.id) return next()
@@ -83,7 +88,7 @@ test('id ca', function (t) {
   t.plan(8)
 
   var core = kappa(ram, { valueEncoding: 'json' })
-  var idx = memdb()
+  var idx = makedb()
 
   var sha = require('sha.js')
   var caIdx = kv(idx, function (msg, next) {
