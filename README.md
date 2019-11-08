@@ -1,8 +1,13 @@
 # kappa-view-kv
 
-> general purpose multi-register key/value view for [kappa-core][kappa-core]
+> General purpose multi-value key/value view for [kappa-core][kappa-core]
 
-TODO: description
+Models a key/value store, except each key can map to multiple values. This is
+necessary, since multiple users could write an edit to a key at the same time,
+while offline, and then sync with each other at a later time. A subsequent
+write to that key would overwrite both, causing there to be one value for that
+key again. This is done so that each application can choose what kind of
+conflict resolution scheme works best for it.
 
 ## Usage
 
