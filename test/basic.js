@@ -1,7 +1,9 @@
 var test = require('tape')
 var level = require('level')
 var ram = require('random-access-memory')
-var kappa = require('kappa-core')
+var multifeed = require('multifeed')
+var Kappa = require('kappa-core')
+var multifeedSource = require('kappa-core/sources/multifeed')
 var collect = require('collect-stream')
 var tmp = require('tmp')
 var kv = require('..')
@@ -13,7 +15,9 @@ function makedb () {
 test('id kv', function (t) {
   t.plan(13)
 
-  var core = kappa(ram, { valueEncoding: 'json' })
+  var feeds = multifeed(ram, { valueEncoding: 'json' })
+  var core = new Kappa()
+  var source = multifeedSource({ feeds })
   var idx = makedb()
 
   var kvIdx = kv(idx, function (msg, next) {
@@ -23,9 +27,9 @@ test('id kv', function (t) {
     ops.push({ key: msg.value.id, id: msgId, links: msg.value.links || [] })
     next(null, ops)
   })
-  core.use('kv', kvIdx)
+  core.use('kv', source, kvIdx)
 
-  core.feed('local', function (err, feed) {
+  feeds.writer('local', function (err, feed) {
     var docs = [
       { id: 'foo' },
       { id: 'foo', n: 3, links: [0] },
@@ -48,7 +52,7 @@ test('id kv', function (t) {
     })(0)
 
     function check () {
-      core.api.kv.get('foo', function (err, values) {
+      core.view.kv.get('foo', function (err, values) {
         t.error(err, 'check ok')
         var expected = [
           {
@@ -64,7 +68,7 @@ test('id kv', function (t) {
         ]
         t.deepEquals(values.map(v => v.value), expected, 'values match')
 
-        collect(core.api.kv.createReadStream(), function (err, res) {
+        collect(core.view.kv.createReadStream(), function (err, res) {
           t.error(err)
           res = res.map(m => { return { key: m.key, value: m.value.value } })
           t.deepEquals(res, [
@@ -76,7 +80,7 @@ test('id kv', function (t) {
     }
 
     var n = 0
-    core.api.kv.onUpdateKey('foo', function (msg) {
+    core.view.kv.onUpdateKey('foo', function (msg) {
       t.deepEquals(msg.value, msgs[n], 'update correct (value)')
       t.equals(msg.seq, n, 'update correct (seq)')
       n++
@@ -87,7 +91,9 @@ test('id kv', function (t) {
 test('id ca', function (t) {
   t.plan(8)
 
-  var core = kappa(ram, { valueEncoding: 'json' })
+  var feeds = multifeed(ram, { valueEncoding: 'json' })
+  var core = new Kappa()
+  var source = multifeedSource({ feeds })
   var idx = makedb()
 
   var sha = require('sha.js')
@@ -98,9 +104,9 @@ test('id ca', function (t) {
     ops.push({ key: hash, id: msgId, links: [] })
     next(null, ops)
   })
-  core.use('ca', caIdx)
+  core.use('ca', source, caIdx)
 
-  core.feed('local', function (err, feed) {
+  feeds.writer('local', function (err, feed) {
     var docs = [
       { id: 'foo', y: -1 },
       { id: 'bax', n: 1 },
@@ -132,7 +138,7 @@ test('id ca', function (t) {
     })(0)
 
     function check () {
-      core.api.ca.get('6bb253dcd04354f71fac02a1a0b0ab68b94e24e3fdb3ed145ff16aa4eec8f98a', function (err, values) {
+      core.view.ca.get('6bb253dcd04354f71fac02a1a0b0ab68b94e24e3fdb3ed145ff16aa4eec8f98a', function (err, values) {
         t.error(err, 'check ok')
         var expected = [ { id: 'bax', n: 1 } ]
         values = values.map(v => v.value)
@@ -140,7 +146,7 @@ test('id ca', function (t) {
       })
     }
 
-    core.api.ca.onUpdateKey('8e09a0313464c6b5d57c0e0948d316c94b66f6e02873798d68d5411c84f0303d', function (msg) {
+    core.view.ca.onUpdateKey('8e09a0313464c6b5d57c0e0948d316c94b66f6e02873798d68d5411c84f0303d', function (msg) {
       t.deepEquals(msg.value, msgs[0], 'update correct (value)')
       t.equals(msg.seq, 0, 'update correct (seq)')
       var hash = sha('sha256').update(JSON.stringify(msg.value)).digest('hex')
