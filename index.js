@@ -46,6 +46,7 @@ function KV (db, mapFn, opts) {
 
     api: {
       get: function (core, key, cb) {
+        const self = this
         this.ready(function () {
           kv.get(key, function (err, ids) {
             if (err) return cb(err)
@@ -58,7 +59,7 @@ function KV (db, mapFn, opts) {
               // TODO: expose this on kappa-core somehow
               // TODO: in fact, can we just expose the 'version' string /w @
               // explicitly?
-              var feed = core._logs.feed(id.split('@')[0])
+              var feed = self.source.feed(id.split('@')[0])
               var seq = Number(id.split('@')[1])
               ;(function (feed, seq) {
                 feed.get(seq, function (err, value) {
@@ -86,12 +87,13 @@ function KV (db, mapFn, opts) {
       },
 
       createReadStream: function (core) {
+        const flow = this
         var t = through.obj(function (entry, _, next) {
           var self = this
           var pending = 1
           var res = entry.value.split(',').forEach(function (value) {
             pending++
-            var feed = core._logs.feed(value.split('@')[0])
+            var feed = flow.source.feed(value.split('@')[0])
             if (feed) {
               var seq = Number(value.split('@')[1])
               feed.get(seq, function (err, val) {

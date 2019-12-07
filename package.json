@@ -20,8 +20,9 @@
   },
   "devDependencies": {
     "collect-stream": "^1.2.1",
-    "kappa-core": "^2.3.2",
+    "kappa-core": "github:Frando/kappa-core#kappa5-new",
     "level": "^5.0.1",
+    "multifeed": "^5.1.1",
     "random-access-memory": "^3.0.0",
     "sha.js": "^2.4.11",
     "standard": "~10.0.0",
